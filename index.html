@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRIDGES // Chiral Lore Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=Space+Grotesk:wght@500;600&amp;display=swap');
+        :root {
+            --bg: #0a0f1e;
+            --card: #111827;
+            --accent: #3b82f6;
+            --gold: #d4af37;
+            --text: #e0e7ff;
+            --muted: #64748b;
+        }
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        .heading { font-family: 'Space Grotesk', system_ui, sans-serif; letter-spacing: -0.02em; }
+        .terminal-header {
+            background: linear-gradient(to right, #0a0f1e, #111827);
+            border-bottom: 1px solid #1e3a8a;
+        }
+        .chiral-card {
+            background-color: var(--card);
+            border: 1px solid #1e3a8a;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .chiral-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 1px #3b82f6;
+        }
+        .section { display: none; }
+        .section.active { display: block; }
+        .nav-link {
+            transition: all 0.2s ease;
+        }
+        .nav-link.active {
+            color: #3b82f6;
+            border-bottom: 2px solid #3b82f6;
+        }
+        .lore-modal {
+            animation: modalEnter 0.2s ease forwards;
+        }
+        @keyframes modalEnter {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #3b82f6;
+            border-radius: 50%;
+            opacity: 0.6;
+            pointer-events: none;
+            animation: float-particle 4s infinite ease-in-out;
+        }
+        .timeline-item {
+            position: relative;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: -24px;
+            width: 2px;
+            background: #1e3a8a;
+        }
+        .timeline-item:last-child::before { display: none; }
+        .chiral-glow {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
+        }
+        .terminal-text {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+        .lore-entry {
+            transition: all 0.2s ease;
+        }
+        .lore-entry:hover {
+            transform: translateX(4px);
+        }
+    </style>
+</head>
+<body class="bg-[#0a0f1e] text-[#e0e7ff] min-h-screen">
+    <!-- Top Terminal Bar -->
+    <div class="terminal-header sticky top-0 z-50 border-b border-[#1e3a8a]">
+        <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-x-3">
+                <div class="flex items-center gap-x-2">
+                    <div onclick="triggerEasterEgg()" class="w-8 h-8 rounded bg-[#1e3a8a] flex items-center justify-center cursor-pointer">
+                        <i class="fa-solid fa-link text-[#3b82f6] text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="font-semibold tracking-[3px] text-sm">BRIDGES</div>
+                        <div class="text-[10px] text-[#64748b] -mt-1">CLASSIFIED // LORE ARCHIVE</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-x-4 text-xs">
+                <div class="hidden md:flex items-center gap-x-2 px-3 py-1 bg-[#111827] rounded-full border border-[#1e3a8a]">
+                    <i class="fa-solid fa-wifi text-emerald-400"></i>
+                    <span class="text-emerald-400">CHIRAL LINK ACTIVE</span>
+                </div>
+                <div class="text-[#64748b] terminal-text">ACCESS LEVEL: RESEARCHER</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="max-w-7xl mx-auto px-6 pt-6">
+        <div class="flex flex-wrap items-center gap-x-1 border-b border-[#1e3a8a] pb-4">
+            <button onclick="switchSection('home')" class="nav-link active px-5 py-2 text-sm font-medium flex items-center gap-x-2" id="nav-home">
+                <i class="fa-solid fa-home"></i> <span>HOME</span>
+            </button>
+            <button onclick="switchSection('world')" class="nav-link px-5 py-2 text-sm font-medium flex items-center gap-x-2" id="nav-world">
+                <i class="fa-solid fa-globe"></i> <span>WORLD DATABASE</span>
+            </button>
+            <button onclick="switchSection('characters')" class="nav-link px-5 py-2 text-sm font-medium flex items-center gap-x-2" id="nav-characters">
+                <i class="fa-solid fa-users"></i> <span>CHARACTER ARCHIVE</span>
+            </button>
+            <button onclick="switchSection('tech')" class="nav-link px-5 py-2 text-sm font-medium flex items-center gap-x-2" id="nav-tech">
+                <i class="fa-solid fa-microchip"></i> <span>TECHNOLOGY</span>
+            </button>
+            <button onclick="switchSection('timeline')" class="nav-link px-5 py-2 text-sm font-medium flex items-center gap-x-2" id="nav-timeline">
+                <i class="fa-solid fa-clock"></i> <span>TIMELINE</span>
+            </button>
+            <button onclick="switchSection('theory')" class="nav-link px-5 py-2 text-sm font-medium flex items-center gap-x-2" id="nav-theory">
+                <i class="fa-solid fa-question-circle"></i> <span>THEORY VAULT</span>
+            </button>
+            <button onclick="switchSection('media')" class="nav-link px-5 py-2 text-sm font-medium flex items-center gap-x-2" id="nav-media">
+                <i class="fa-solid fa-images"></i> <span>MEDIA</span>
+            </button>
+            
+            <!-- Search -->
+            <div class="ml-auto flex items-center bg-[#111827] border border-[#1e3a8a] rounded-2xl px-4 w-full md:w-72 mt-3 md:mt-0">
+                <i class="fa-solid fa-search text-[#64748b]"></i>
+                <input id="global-search" type="text" placeholder="Search the chiral network..." 
+                       onkeyup="handleGlobalSearch()"
+                       class="flex-1 bg-transparent px-3 py-2 text-sm outline-none placeholder:text-[#64748b]">
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 pb-16">
+        
+        <!-- HOME -->
+        <div id="home" class="section active pt-10">
+            <div class="max-w-4xl mx-auto text-center">
+                <div class="inline-flex items-center gap-x-2 px-4 py-1.5 bg-[#111827] border border-[#1e3a8a] rounded-full text-xs tracking-[2px] mb-6">
+                    <i class="fa-solid fa-satellite"></i>
+                    <span>IN-UNIVERSE ARCHIVE // RECOVERED FROM THE BEACH</span>
+                </div>
+                
+                <h1 class="text-6xl md:text-7xl font-semibold tracking-tighter heading mb-4">The Chiral<br>Network</h1>
+                <p class="text-2xl text-[#64748b] max-w-md mx-auto">A classified research terminal documenting the Death Stranding and everything that came after.</p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center mt-10">
+                    <button onclick="switchSection('world')" 
+                            class="px-8 py-4 bg-[#3b82f6] hover:bg-blue-600 transition-colors text-white rounded-2xl font-medium flex items-center justify-center gap-x-3">
+                        <span>Enter the World Database</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                    <button onclick="switchSection('timeline')" 
+                            class="px-8 py-4 border border-[#1e3a8a] hover:bg-[#111827] transition-colors rounded-2xl font-medium flex items-center justify-center gap-x-3">
+                        View the Timeline
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-16 grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                <div class="chiral-card rounded-3xl p-7">
+                    <div class="text-[#3b82f6] text-3xl mb-4"><i class="fa-solid fa-link"></i></div>
+                    <div class="font-semibold text-xl mb-2">The Connection</div>
+                    <div class="text-[#64748b] text-sm">The Death Stranding tore the fabric between life and death. The chiral network is our only bridge back.</div>
+                </div>
+                <div class="chiral-card rounded-3xl p-7">
+                    <div class="text-[#3b82f6] text-3xl mb-4"><i class="fa-solid fa-user-secret"></i></div>
+                    <div class="font-semibold text-xl mb-2">The Porters</div>
+                    <div class="text-[#64748b] text-sm">Brave individuals who carry the weight of the world — literally — across a fractured America.</div>
+                </div>
+                <div class="chiral-card rounded-3xl p-7">
+                    <div class="text-[#3b82f6] text-3xl mb-4"><i class="fa-solid fa-question"></i></div>
+                    <div class="font-semibold text-xl mb-2">The Mysteries</div>
+                    <div class="text-[#64748b] text-sm">Extinction Entities. Beaches. The truth behind Amelie. So much remains classified... or unknown.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- WORLD DATABASE -->
+        <div id="world" class="section pt-8">
+            <div class="mb-8">
+                <h2 class="text-4xl font-semibold tracking-tight">World Database</h2>
+                <p class="text-[#64748b] mt-2">Core phenomena and concepts that define the post-Stranding world.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5" id="world-grid">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <!-- CHARACTER ARCHIVE -->
+        <div id="characters" class="section pt-8">
+            <div class="mb-8">
+                <h2 class="text-4xl font-semibold tracking-tight">Character Archive</h2>
+                <p class="text-[#64748b] mt-2">Key figures connected to the chiral network and the fight for humanity's future.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5" id="character-grid">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <!-- TECHNOLOGY DATABASE -->
+        <div id="tech" class="section pt-8">
+            <div class="mb-8">
+                <h2 class="text-4xl font-semibold tracking-tight">Technology Database</h2>
+                <p class="text-[#64748b] mt-2">The tools and systems that allow humanity to survive and reconnect.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5" id="tech-grid">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <!-- TIMELINE -->
+        <div id="timeline" class="section pt-8">
+            <div class="mb-8">
+                <h2 class="text-4xl font-semibold tracking-tight">Chronological Timeline</h2>
+                <p class="text-[#64748b] mt-2">Major events before, during, and after the Death Stranding. Click entries for details.</p>
+            </div>
+            <div id="timeline-container" class="max-w-3xl mx-auto space-y-6">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <!-- THEORY VAULT -->
+        <div id="theory" class="section pt-8">
+            <div class="mb-8">
+                <h2 class="text-4xl font-semibold tracking-tight">Theory Vault</h2>
+                <p class="text-[#64748b] mt-2">Unanswered questions and community speculation from the chiral research community.</p>
+            </div>
+            <div class="space-y-4 max-w-4xl" id="theory-list">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <!-- MEDIA GALLERY -->
+        <div id="media" class="section pt-8">
+            <div class="mb-8">
+                <h2 class="text-4xl font-semibold tracking-tight">Media Gallery</h2>
+                <p class="text-[#64748b] mt-2">Recovered images, concept documentation, and visual records from the field.</p>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="media-grid">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Lore Detail Modal -->
+    <div id="lore-modal" onclick="if (event.target.id === 'lore-modal') closeModal()" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4">
+        <div onclick="event.stopImmediatePropagation()" class="chiral-card rounded-3xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col">
+            <div class="px-7 py-5 border-b border-[#1e3a8a] flex items-center justify-between">
+                <div>
+                    <div id="modal-category" class="text-xs tracking-[2px] text-[#3b82f6] font-medium"></div>
+                    <div id="modal-title" class="text-2xl font-semibold"></div>
+                </div>
+                <button onclick="closeModal()" class="text-3xl text-[#64748b] hover:text-white">&times;</button>
+            </div>
+            <div class="p-7 overflow-auto flex-1 text-[#cbd5e1]" id="modal-content">
+                <!-- Dynamic content -->
+            </div>
+            <div class="px-7 py-4 border-t border-[#1e3a8a] bg-[#0a0f1e] text-xs text-[#64748b] flex items-center justify-between">
+                <div>BRIDGES CLASSIFIED ARCHIVE</div>
+                <div onclick="closeModal()" class="cursor-pointer hover:text-white">CLOSE TERMINAL</div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="border-t border-[#1e3a8a] py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-6 text-center text-xs text-[#64748b]">
+            Recovered from the chiral network • For research purposes only • Not for public distribution
+        </div>
+    </footer>
+
+    <script>
+        // Tailwind config
+        function initTailwind() {
+            // Already using CDN, additional config if needed
+        }
+
+        let currentSection = 'home';
+
+        function switchSection(section) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(section).classList.add('active');
+            
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            const nav = document.getElementById('nav-' + section);
+            if (nav) nav.classList.add('active');
+            
+            currentSection = section;
+            
+            // Close mobile nav if open (future proof)
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Data
+        const worldData = [
+            {
+                id: 'ds-event',
+                title: 'The Death Stranding',
+                category: 'WORLD',
+                summary: 'The cataclysmic event that connected the world of the living with the world of the dead.',
+                content: `<p>The Death Stranding was a global phenomenon that occurred when the boundary between life and death was torn open. It resulted in the appearance of BTs (Beached Things), Timefall, and the phenomenon known as Voidouts.</p><p>Many believe it was triggered by the actions of an Extinction Entity. The event fundamentally changed human society and the very nature of existence.</p>`
+            },
+            {
+                id: 'beaches',
+                title: 'Beaches',
+                category: 'WORLD',
+                summary: 'The liminal space between life and death where souls wash up after passing.',
+                content: `<p>Beaches are the metaphysical shores where the dead arrive after leaving the world of the living. They are not the afterlife itself, but a transitional realm.</p><p>Some individuals, like Sam, have a unique connection to the Beach and can return from it. The appearance of a person's Beach often reflects their inner state or important memories.</p>`
+            },
+            {
+                id: 'bts',
+                title: 'BTs (Beached Things)',
+                category: 'WORLD',
+                summary: 'Spectral entities from the Beach that manifest in the living world and cause catastrophic voidouts when they come into contact with living matter.',
+                content: `<p>BTs are the physical manifestations of the dead who have become trapped between worlds. They are invisible to most people but can be detected using special equipment or by those with DOOMS.</p><p>When a BT comes into contact with a living human, it triggers a Voidout — a massive explosion that leaves behind a crater.</p>`
+            },
+            {
+                id: 'chiralium',
+                title: 'Chiralium',
+                category: 'WORLD',
+                summary: 'A mysterious substance with unique properties that enables chiral communication and is central to the post-Stranding world.',
+                content: `<p>Chiralium is a exotic matter that exists in a chiral state. It is the key component that allows the Chiral Network to function, enabling instantaneous communication and matter transfer across vast distances.</p><p>It is also found in high concentrations near Beaches and is harvested for use in technology.</p>`
+            },
+            {
+                id: 'timefall',
+                title: 'Timefall',
+                category: 'WORLD',
+                summary: 'Rain that accelerates the aging of anything it touches. A constant threat in the post-Stranding world.',
+                content: `<p>Timefall is rain that has been affected by the Death Stranding. Any living thing or object exposed to it ages rapidly — sometimes in seconds.</p><p>Porters and settlements must take constant precautions against Timefall. It is one of the most visible and dangerous effects of the Stranding.</p>`
+            },
+            {
+                id: 'voidouts',
+                title: 'Voidouts',
+                category: 'WORLD',
+                summary: 'Massive explosions caused when a BT comes into contact with living matter. They leave behind large craters.',
+                content: `<p>A Voidout occurs when the antimatter within a BT reacts with normal matter. The resulting explosion is devastating and leaves behind a perfectly circular crater.</p><p>Entire cities have been destroyed by Voidouts. They are the primary reason most of America has been abandoned.</p>`
+            },
+            {
+                id: 'extinction-entities',
+                title: 'Extinction Entities',
+                category: 'WORLD',
+                summary: 'God-like beings associated with the six extinction events in Earth\'s history. Their appearance is linked to the Death Stranding.',
+                content: `<p>Extinction Entities are ancient, powerful beings that appear at the end of each major extinction event on Earth. The current Death Stranding is believed to be connected to one of these entities.</p><p>Their true nature and goals remain one of the greatest mysteries in the chiral network.</p>`
+            }
+        ];
+
+        const characterData = [
+            {
+                id: 'sam',
+                title: 'Sam Porter Bridges',
+                category: 'CHARACTER',
+                summary: 'Legendary porter with DOOMS. The man tasked with reconnecting America.',
+                content: `<p>Sam is a repatriate — someone who can return from the Beach after death. He suffers from aphenphosmphobia (fear of being touched) but gradually opens up through his journey.</p><p>He is the son of President Bridges and carries a deep, complicated connection to Amelie. His ability to "strand" cargo across America makes him central to the reconstruction effort.</p>`
+            },
+            {
+                id: 'fragile',
+                title: 'Fragile',
+                category: 'CHARACTER',
+                summary: 'Owner of Fragile Express. A skilled porter who was betrayed by Higgs.',
+                content: `<p>Fragile is one of the most capable independent porters. She was once partnered with Higgs before he betrayed her and exposed her to Timefall, aging her body significantly.</p><p>Despite her trauma, she continues to help Sam and believes in the importance of reconnecting the country.</p>`
+            },
+            {
+                id: 'deadman',
+                title: 'Deadman',
+                category: 'CHARACTER',
+                summary: 'BRIDGES doctor who studies the Beach and helps Sam with his condition.',
+                content: `<p>Deadman is a brilliant but eccentric scientist working for BRIDGES. He has a deep fascination with the Beach and helps Sam understand his repatriate abilities.</p><p>He is one of the few people Sam trusts with his secrets.</p>`
+            },
+            {
+                id: 'heartman',
+                title: 'Heartman',
+                category: 'CHARACTER',
+                summary: 'A researcher who repeatedly dies and revives to study the Beach.',
+                content: `<p>Heartman has a rare condition that causes his heart to stop for several minutes at a time. During these periods, he travels to the Beach to conduct research.</p><p>His work has been invaluable in understanding the nature of the Beach and the connection between life and death.</p>`
+            },
+            {
+                id: 'higgs',
+                title: 'Higgs Monaghan',
+                category: 'CHARACTER',
+                summary: 'The "Man in the Golden Mask." A powerful terrorist with a deep connection to the Beach.',
+                content: `<p>Higgs is one of the most dangerous figures in the post-Stranding world. He has a god complex and believes he is an agent of extinction.</p><p>He was once a porter but became twisted after gaining immense power from an Extinction Entity.</p>`
+            },
+            {
+                id: 'amelie',
+                title: 'Amelie',
+                category: 'CHARACTER',
+                summary: 'The mysterious woman connected to the Beach and the fate of the world.',
+                content: `<p>Amelie is a central and enigmatic figure. She appears to Sam throughout his journey and has a profound connection to the Beach and the Extinction Entity.</p><p>Her true nature and relationship to President Bridges and Sam are among the biggest mysteries of the Death Stranding.</p>`
+            }
+        ];
+
+        const techData = [
+            {
+                id: 'bb-pod',
+                title: 'BB Pod',
+                category: 'TECHNOLOGY',
+                summary: 'Bridge Baby containment unit. Allows a BB to stay connected to the living world.',
+                content: `<p>The BB Pod is a specialized container that keeps a Bridge Baby (BB) alive and connected to the world of the living. It is essential for detecting BTs.</p><p>Sam's BB, Lou, is kept in such a pod. The relationship between porter and BB is deeply personal and important.</p>`
+            },
+            {
+                id: 'q-pid',
+                title: 'Q-Pid',
+                category: 'TECHNOLOGY',
+                summary: 'Quantum device that allows connection to the Chiral Network.',
+                content: `<p>The Q-Pid is a small device that enables a person to connect to the Chiral Network. It is the key to "stranding" America back together.</p><p>Sam carries a special version that allows him to link isolated cities and settlements.</p>`
+            },
+            {
+                id: 'chiral-network',
+                title: 'Chiral Network',
+                category: 'TECHNOLOGY',
+                summary: 'The communication and matter transfer system that uses chiralium to connect the country.',
+                content: `<p>The Chiral Network is the backbone of post-Stranding society. It allows near-instantaneous communication and the transfer of matter across vast distances using chiralium.</p><p>Rebuilding and expanding the Chiral Network is the central goal of BRIDGES.</p>`
+            },
+            {
+                id: 'reverse-trike',
+                title: 'Reverse Trike',
+                category: 'TECHNOLOGY',
+                summary: 'All-terrain vehicle used by porters to transport cargo across difficult terrain.',
+                content: `<p>The Reverse Trike is a versatile three-wheeled vehicle designed for the harsh post-Stranding landscape. It can be equipped with various upgrades and is essential for long deliveries.</p>`
+            }
+        ];
+
+        const timelineData = [
+            { year: 'Pre-2019', event: 'The Death Stranding occurs', detail: 'The boundary between life and death is torn. BTs appear. Society begins to collapse.' },
+            { year: '2019-2025', event: 'The early years of chaos', detail: 'Voidouts destroy major cities. Governments fall. Survivors form isolated communities.' },
+            { year: '2025+', event: 'BRIDGES is formed', detail: 'President Bridges creates the organization to reconnect America using the Chiral Network.' },
+            { year: 'DS1 Events', event: 'Sam\'s journey begins', detail: 'Sam is tasked with connecting the Knot Cities. He encounters Higgs and learns the truth about Amelie.' },
+            { year: 'Post-DS1', event: 'Reconstruction continues', detail: 'The Chiral Network grows. New threats and mysteries emerge as humanity tries to heal.' }
+        ];
+
+        const theoryData = [
+            {
+                id: 'amelie-entity',
+                question: 'Is Amelie an Extinction Entity?',
+                theory: 'Many researchers believe Amelie is either an Extinction Entity herself or is deeply connected to one. Her control over the Beach and her influence on events suggest god-like power.',
+                evidence: 'Her ability to appear across time and space, her connection to the Beach, and the way events seem to revolve around her.'
+            },
+            {
+                id: 'beach-afterlife',
+                question: 'What exactly is the Beach?',
+                theory: 'The Beach may not be a single place but a personalized liminal space created by each soul. It could be a manifestation of the subconscious or a shared collective unconscious.',
+                evidence: 'Different people report vastly different experiences on the Beach. Sam\'s Beach is tied to his trauma and relationships.'
+            }
+        ];
+
+        // Render functions
+        function renderWorld() {
+            const grid = document.getElementById('world-grid');
+            grid.innerHTML = '';
+            worldData.forEach(item => {
+                const card = createLoreCard(item);
+                grid.appendChild(card);
+            });
+        }
+
+        function renderCharacters() {
+            const grid = document.getElementById('character-grid');
+            grid.innerHTML = '';
+            characterData.forEach(item => {
+                const card = createLoreCard(item);
+                grid.appendChild(card);
+            });
+        }
+
+        function renderTech() {
+            const grid = document.getElementById('tech-grid');
+            grid.innerHTML = '';
+            techData.forEach(item => {
+                const card = createLoreCard(item);
+                grid.appendChild(card);
+            });
+        }
+
+        function createLoreCard(item) {
+            const card = document.createElement('div');
+            card.className = 'chiral-card rounded-3xl p-6 cursor-pointer lore-entry';
+            card.innerHTML = `
+                <div class="text-xs tracking-[1.5px] text-[#3b82f6] mb-2 font-medium">${item.category}</div>
+                <div class="font-semibold text-xl mb-3">${item.title}</div>
+                <div class="text-sm text-[#64748b] line-clamp-3">${item.summary}</div>
+                <div class="mt-4 text-xs text-[#3b82f6] flex items-center gap-x-1">
+                    <span>READ ENTRY</span> <i class="fa-solid fa-arrow-right text-xs"></i>
+                </div>
+            `;
+            card.onclick = () => openModal(item);
+            return card;
+        }
+
+        function renderTimeline() {
+            const container = document.getElementById('timeline-container');
+            container.innerHTML = '';
+            
+            timelineData.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'timeline-item flex gap-6 cursor-pointer chiral-card rounded-2xl p-6';
+                div.innerHTML = `
+                    <div class="w-20 flex-shrink-0">
+                        <div class="text-[#3b82f6] font-mono text-sm">${item.year}</div>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-semibold text-lg">${item.event}</div>
+                        <div class="text-[#64748b] mt-1 text-sm">${item.detail}</div>
+                    </div>
+                `;
+                div.onclick = () => {
+                    const modalItem = {
+                        title: item.event,
+                        category: 'TIMELINE',
+                        summary: item.detail,
+                        content: `<p>${item.detail}</p><p class="mt-4 text-sm text-[#64748b]">This event is considered a pivotal moment in the post-Stranding era.</p>`
+                    };
+                    openModal(modalItem);
+                };
+                container.appendChild(div);
+            });
+        }
+
+        function renderTheories() {
+            const container = document.getElementById('theory-list');
+            container.innerHTML = '';
+            
+            theoryData.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'chiral-card rounded-3xl p-6';
+                div.innerHTML = `
+                    <div class="font-semibold text-xl mb-3">${item.question}</div>
+                    <div class="text-sm text-[#64748b] mb-4">${item.theory}</div>
+                    <div class="text-xs border-t border-[#1e3a8a] pt-4">
+                        <span class="text-[#3b82f6]">Supporting Evidence:</span><br>
+                        ${item.evidence}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function renderMedia() {
+            const grid = document.getElementById('media-grid');
+            grid.innerHTML = '';
+            
+            const mediaItems = [
+                { title: 'Sam on the Beach', desc: 'Recovered visual from chiral link' },
+                { title: 'BT Manifestation', desc: 'Field documentation' },
+                { title: 'Chiral Network Node', desc: 'Early prototype' },
+                { title: 'Timefall in the Wild', desc: 'Weather phenomenon capture' },
+                { title: 'Higgs Monaghan', desc: 'Suspect profile image' },
+                { title: 'Bridge Baby Pod', desc: 'Technical schematic' }
+            ];
+            
+            mediaItems.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'chiral-card rounded-2xl overflow-hidden aspect-video relative group';
+                div.innerHTML = `
+                    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0f1e]/60 to-[#0a0f1e] flex items-end p-4">
+                        <div>
+                            <div class="font-medium">${item.title}</div>
+                            <div class="text-xs text-[#64748b]">${item.desc}</div>
+                        </div>
+                    </div>
+                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+                        <i class="fa-solid fa-play text-white text-3xl"></i>
+                    </div>
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        function openModal(item) {
+            document.getElementById('modal-title').innerText = item.title;
+            document.getElementById('modal-category').innerText = item.category;
+            document.getElementById('modal-content').innerHTML = item.content;
+            
+            document.getElementById('lore-modal').classList.remove('hidden');
+            document.getElementById('lore-modal').classList.add('flex');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('lore-modal');
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        }
+
+        function handleGlobalSearch() {
+            const term = document.getElementById('global-search').value.toLowerCase().trim();
+            if (!term) {
+                // Reset to current section or show all
+                return;
+            }
+            
+            // Simple search across all data
+            const allData = [...worldData, ...characterData, ...techData];
+            const results = allData.filter(item => 
+                item.title.toLowerCase().includes(term) || 
+                item.summary.toLowerCase().includes(term)
+            );
+            
+            if (results.length > 0) {
+                // Show first result in modal
+                openModal(results[0]);
+                // Clear search
+                document.getElementById('global-search').value = '';
+            } else {
+                alert('No matches found in the chiral archive.');
+            }
+        }
+
+        function triggerEasterEgg() {
+            const body = document.body;
+            body.style.transition = 'filter 0.1s';
+            body.style.filter = 'hue-rotate(180deg) saturate(1.5)';
+            
+            setTimeout(() => {
+                body.style.filter = 'none';
+            }, 600);
+            
+            // Show a secret message
+            setTimeout(() => {
+                const msg = document.createElement('div');
+                msg.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#111827] border border-[#3b82f6] text-xs px-4 py-2 rounded-2xl z-[200]';
+                msg.innerHTML = '“Keep on keeping on.” — Sam Porter Bridges';
+                document.body.appendChild(msg);
+                setTimeout(() => msg.remove(), 2800);
+            }, 700);
+        }
+
+        function createParticles() {
+            const container = document.createElement('div');
+            container.style.position = 'fixed';
+            container.style.top = '0';
+            container.style.left = '0';
+            container.style.width = '100%';
+            container.style.height = '100%';
+            container.style.pointerEvents = 'none';
+            container.style.zIndex = '-1';
+            document.body.appendChild(container);
+
+            for (let i = 0; i < 25; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.top = Math.random() * 100 + 'vh';
+                p.style.animationDelay = (Math.random() * -4) + 's';
+                container.appendChild(p);
+            }
+        }
+
+        function init() {
+            initTailwind();
+            
+            // Render all sections
+            renderWorld();
+            renderCharacters();
+            renderTech();
+            renderTimeline();
+            renderTheories();
+            renderMedia();
+            
+            // Create floating particles
+            createParticles();
+            
+            // Keyboard shortcut for search
+            document.addEventListener('keydown', function(e) {
+                if (e.key === '/' && document.activeElement.tagName === 'BODY') {
+                    e.preventDefault();
+                    document.getElementById('global-search').focus();
+                }
+                if (e.key === 'Escape') {
+                    const modal = document.getElementById('lore-modal');
+                    if (!modal.classList.contains('hidden')) {
+                        closeModal();
+                    }
+                }
+            });
+
+            // Show home by default
+            document.getElementById('home').classList.add('active');
+            document.getElementById('nav-home').classList.add('active');
+
+            // Subtle welcome in console
+            console.log('%c[Chiral Lore Terminal] Immersive BRIDGES archive initialized. All data is client-side.', 'color:#64748b');
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
